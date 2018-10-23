@@ -48,8 +48,14 @@ void MainWindow::on_menuCreate_triggered()  // triggered = нажание
     // Открывается окно создания матрицы, выполняется при нажатии кнопки ОК
     if(dialog.exec())
     {
-        if(currentNumberOfTabs > 0)
+        if(currentNumberOfTabs == 0)
         {
+            // Создаётся таб виджет при первом создании вкладки
+            mainTabWidget->setVisible(true);
+            mainTabWidget->setGeometry(0, 0, width() - MINUS_W , height() - statusBar()->height() -
+                                       MINUS_H );
+            matrixes = new Matrix[currentNumberOfTabs+1];
+        } else {
             // Изменяем размер массива матриц
             Matrix * temp = new Matrix[currentNumberOfTabs];
             for(int i = 0; i < currentNumberOfTabs; i++)
@@ -58,109 +64,53 @@ void MainWindow::on_menuCreate_triggered()  // triggered = нажание
             matrixes = new Matrix[currentNumberOfTabs+1];
             for(int i = 0; i < currentNumberOfTabs; i++)
                 matrixes[i] = temp[i];
+        }
 
-            matrixes[currentNumberOfTabs].setSize(dialog.getMatrixSize());
-            matrixes[currentNumberOfTabs].setName(dialog.getMatrixName());
+        progressBar->setValue(0);
+        matrixes[currentNumberOfTabs].setSize(dialog.getMatrixSize());
+        matrixes[currentNumberOfTabs].setName(dialog.getMatrixName());
 
-            filType type = dialog.getFilType();
-            srand(time(0)); /* если понадобится рандом, то автоматически рандомизируем до *
-                             * вхожденияв цикл.                                           */
+        filType type = dialog.getFilType();
+        srand(time(0)); /* если понадобится рандом, то автоматически рандомизируем до *
+                         * вхожденияв цикл.                                           */
 
-            // непосредственое создание самой матрицы на экране
-            QWidget * newTab = new QWidget();
-            matrixes[currentNumberOfTabs].setWidget(newTab);
-            QGridLayout * layout = new QGridLayout;
-            // Заполнение layout'a полями
-            for(int i = 0; i < matrixes[currentNumberOfTabs].getSize(); i++) {
-                for(int j = 0; j < matrixes[currentNumberOfTabs].getSize(); j++) {
-                    if(i < j) {
-                        QLabel * label = new QLabel;
-                        label->setText("0");
-                        layout->addWidget(label, i, j);
-                    }else {
-                        QDynamicLineEdit * line = new QDynamicLineEdit;
-                        layout->addWidget(line, i, j);
-                        float value;
-                        switch (type) {
-                            case RANDOM:
-                                value = rand()%10;
-                                break;
-                            case NULLIFIED:
-                                value = 0;
-                                break;
-                            case DEFINED:
-                                value = dialog.getDefinedValue();
-                                break;
-                        }
-                        line->setText(QString::number(value));
-                        matrixes[currentNumberOfTabs].setValue(i, j, value);
+        // непосредственое создание самой матрицы на экране
+        QWidget * newTab = new QWidget();
+        QGridLayout * layout = new QGridLayout;
+        matrixes[currentNumberOfTabs].setWidget(newTab);
+
+        // Заполнение layout'a полями
+        for(int i = 0; i < matrixes[currentNumberOfTabs].getSize(); i++) {
+            for(int j = 0; j < matrixes[currentNumberOfTabs].getSize(); j++) {
+                if(i < j) {
+                    QLabel * label = new QLabel;
+                    label->setText("0");
+                    layout->addWidget(label, i, j);
+                }else {
+                    QLineEdit * line = new QLineEdit;
+                    layout->addWidget(line, i, j);
+                    float value;
+                    switch (type) {
+                        case RANDOM:
+                            value = rand()%10;
+                            break;
+                        case NULLIFIED:
+                            value = 0;
+                            break;
+                        case DEFINED:
+                            value = dialog.getDefinedValue();
+                            break;
                     }
+                    line->setText(QString::number(value));
+                    matrixes[currentNumberOfTabs].setValue(i, j, value);
                 }
             }
-            newTab->setLayout(layout);
-            mainTabWidget->addTab(currentTab = newTab, matrixes[currentNumberOfTabs].getName());
-            currentNumberOfTabs++;
-            progressBar->setValue(100);
         }
-        else
-        {
-            currentNumberOfTabs++;
-
-            mainTabWidget->setVisible(true);
-            mainTabWidget->setGeometry(0, 0, width() - MINUS_W , height() -
-                                       statusBar()->height() - MINUS_H );
-
-            progressBar->setValue(0);
-            matrixes = new Matrix[currentNumberOfTabs];
-            matrixes[0].setSize(dialog.getMatrixSize());
-            matrixes[0].setName(dialog.getMatrixName());
-            filType type = dialog.getFilType();
-            srand(time(0)); /* если понадобится рандом, то автоматически рандо мизируем до  *
-                             * вхождения в цикл.                                            */
-
-            // Генеразция вкладки
-            QWidget * newTab = new QWidget();
-            QGridLayout * layout = new QGridLayout;
-            matrixes[0].setWidget(newTab);
-
-            // Заполнение layout'a полями
-            for(int i = 0; i < matrixes[0].getSize(); i++) {
-                for(int j = 0; j < matrixes[0].getSize(); j++) {
-                    if(i < j) {
-                        QLabel * label = new QLabel;
-                        label->setText("0");
-                        layout->addWidget(label, i, j);
-                    }else {
-                        /*если элемент находится на главное диагонали или ниже *
-                         *её, создаётся поле, которое можно редактировать.     */
-                        QDynamicLineEdit * line = new QDynamicLineEdit;
-                        layout->addWidget(line, i, j);
-                        float value;
-                        // выбирается тип, указанный при создании вкладки
-                        switch (type) {
-                            case RANDOM:
-                                value = rand()%10;
-                                break;
-                            case NULLIFIED:
-                                value = 0;
-                                break;
-                            case DEFINED:
-                                value = dialog.getDefinedValue();
-                                break;
-                        }
-                        matrixes[0].setValue(i, j, value);
-                        line->setText(QString::number(value));
-                    }
-                }
-            }
-
-            newTab->setLayout(layout);
-            mainTabWidget->addTab(currentTab = newTab, matrixes[0].getName());
-
-            progressBar->setValue(100);
-        }
+        newTab->setLayout(layout);
+        mainTabWidget->addTab(currentTab = newTab, matrixes[currentNumberOfTabs].getName());
+        currentNumberOfTabs++;
+        progressBar->setValue(100);
     }
-
 }
 
 QString MainWindow::get_values(QLayout *layout)
@@ -174,7 +124,7 @@ QString MainWindow::get_values(QLayout *layout)
     for(int i = 0; i < layout->count(); i++) {
         int j = i%(int)sqrt(layout->count()), i_i = i/(int)sqrt(layout->count());
         if(i_i >= j) {
-            QDynamicLineEdit *line = qobject_cast<QDynamicLineEdit*>(layout->itemAt(i)->widget());
+            QLineEdit *line = qobject_cast<QLineEdit*>(layout->itemAt(i)->widget());
             result+= " " + line->text();
         }
     }

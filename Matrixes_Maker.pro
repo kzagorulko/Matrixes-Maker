@@ -16,13 +16,11 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     dialog.cpp \
-    matrix.cpp \
-    qdynamiclineedit.cpp
+    matrix.cpp
 
 HEADERS  += mainwindow.h \
     dialog.h \
-    matrix.h \
-    qdynamiclineedit.h
+    matrix.h
 
 FORMS    += mainwindow.ui \
     dialog.ui

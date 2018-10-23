@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLineEdit>
 #include <QProgressBar>
 #include <QTabWidget>
 #include <QTimer>
@@ -12,7 +13,6 @@
 // локальные файлы
 #include "dialog.h"
 #include "matrix.h"
-#include "qdynamiclineedit.h"
 
 namespace Ui {
 class MainWindow;
