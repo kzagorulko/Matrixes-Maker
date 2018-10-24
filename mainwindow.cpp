@@ -46,10 +46,8 @@ void MainWindow::on_menuCreate_triggered()  // triggered = нажание
 
 
     // Открывается окно создания матрицы, выполняется при нажатии кнопки ОК
-    if(dialog.exec())
-    {
-        if(currentNumberOfTabs == 0)
-        {
+    if(dialog.exec()) {
+        if(currentNumberOfTabs == 0) {
             // Создаётся таб виджет при первом создании вкладки
             mainTabWidget->setVisible(true);
             mainTabWidget->setGeometry(0, 0, width() - MINUS_W , height() - statusBar()->height() -
@@ -88,6 +86,7 @@ void MainWindow::on_menuCreate_triggered()  // triggered = нажание
                     layout->addWidget(label, i, j);
                 }else {
                     QLineEdit * line = new QLineEdit;
+                    line->setValidator(new QDoubleValidator);
                     layout->addWidget(line, i, j);
                     float value;
                     switch (type) {
@@ -101,7 +100,7 @@ void MainWindow::on_menuCreate_triggered()  // triggered = нажание
                             value = dialog.getDefinedValue();
                             break;
                     }
-                    line->setText(QString::number(value));
+                    line->setText(QString::number(value).replace(".",","));
                     matrixes[currentNumberOfTabs].setValue(i, j, value);
                 }
             }
@@ -199,8 +198,8 @@ void MainWindow::on_saveFile_triggered()
     // Выгрузка элементов из матрицы, выбранной на экране.
     if(mainTabWidget->count() > 0) {
         this->currentTab = mainTabWidget->currentWidget();
-        QLayout * layout = mainTabWidget->currentWidget()->layout();
-        QByteArray fileText =  this->get_values(layout).toLocal8Bit();
+        //QLayout * layout = mainTabWidget->currentWidget()->layout();
+        QByteArray fileText =  this->get_values(currentTab).toLocal8Bit();
 
         //Непосредственная запись в файл
         if(file.open(QIODevice::WriteOnly)) {
@@ -231,9 +230,63 @@ void MainWindow::on_openFile_triggered()
     QFile file(path);
 
     if(file.open(QIODevice::ReadOnly)) {
-        // создание новой вкладки и отрисовка элементов
+        // Чтение информации из файла
+        QString matrix = file.readLine();
+        QStringList splitMatrix= matrix.split(' ');
+        qDebug("Opened matrix: %s", matrix.toLocal8Bit().data());
+        int sizeOfMatrix = splitMatrix[0].toInt();
+        QString nameOfMatrix = splitMatrix[splitMatrix.count()-1];
+        qDebug("Name of opened matrix: %s", nameOfMatrix.toLocal8Bit().data());
 
+        // Генерация вкладки
+        if(currentNumberOfTabs == 0)
+        {
+            // Создаётся таб виджет при первом создании вкладки
+            mainTabWidget->setVisible(true);
+            mainTabWidget->setGeometry(0, 0, width() - MINUS_W , height() - statusBar()->height() -
+                                       MINUS_H );
+            matrixes = new Matrix[currentNumberOfTabs+1];
+        } else {
+            // Изменяем размер массива матриц
+            Matrix * temp = new Matrix[currentNumberOfTabs];
+            for(int i = 0; i < currentNumberOfTabs; i++)
+                temp[i] = matrixes[i];
 
+            matrixes = new Matrix[currentNumberOfTabs+1];
+            for(int i = 0; i < currentNumberOfTabs; i++)
+                matrixes[i] = temp[i];
+        }
+
+        progressBar->setValue(0);
+        matrixes[currentNumberOfTabs].setSize(sizeOfMatrix);
+        matrixes[currentNumberOfTabs].setName(nameOfMatrix);
+
+        // непосредственое создание самой матрицы на экране
+        QWidget * newTab = new QWidget();
+        QGridLayout * layout = new QGridLayout;
+        matrixes[currentNumberOfTabs].setWidget(newTab);
+
+        // Заполнение layout'a полями
+        for(int i = 0, k = 1; i < matrixes[currentNumberOfTabs].getSize(); i++) {
+            for(int j = 0; j < matrixes[currentNumberOfTabs].getSize(); j++) {
+                if(i < j) {
+                    QLabel * label = new QLabel;
+                    label->setText("0");
+                    layout->addWidget(label, i, j);
+                }else {
+                    QLineEdit * line = new QLineEdit;
+                    line->setValidator(new QDoubleValidator);
+                    layout->addWidget(line, i, j);
+                    float value = splitMatrix[k++].toFloat();
+                    line->setText(QString::number(value).replace(".",","));
+                    matrixes[currentNumberOfTabs].setValue(i, j, value);
+                }
+            }
+        }
+        newTab->setLayout(layout);
+        mainTabWidget->addTab(currentTab = newTab, matrixes[currentNumberOfTabs].getName());
+        currentNumberOfTabs++;
+        progressBar->setValue(100);
     }
 
     file.close();
