@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <QGridLayout>
 #include <QFileDialog>
+#include <QLabel>
 #include <ctime>
 
 // локальные файлы
@@ -33,6 +34,7 @@ public:
 private slots:
     void on_menuCreate_triggered();
     void step(); // Метод для регулярной обработки условий
+    void on_lineEdit_changed();
     void on_pushButton_clicked();
     void resizeEvent(QResizeEvent * event);
 
@@ -47,9 +49,13 @@ private:
     QTimer* actionTimer; // Таймер для регулярной обработки условий
     Matrix* matrixes; // Массив матриц
     QWidget * currentTab;
+    Matrix * currentMatrix; // Текущая матрица
 
-    QString get_values(QLayout *layout);
-    QString get_values(QWidget *widget);
+    // Переменные настроек
+    bool displayControlSetting;
+
+    QString get_lineEdits_values(QWidget *widget);
+    QString get_matrix_values(QWidget *widget);
     int currentNumberOfTabs;
 
 };

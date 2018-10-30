@@ -15,6 +15,7 @@ public:
     void setSize(int size);
     int getSize();
     void setValue(int i, int j, float value);
+    void setValue(int i, float value);
     float getValue(int i, int j);
     float getValue(int i);
     void setName(QString name);

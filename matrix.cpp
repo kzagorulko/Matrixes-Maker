@@ -26,6 +26,11 @@ void Matrix::setValue(int i, int j, float value)
     this->values[(i*i+i)/2+j] = value;
 }
 
+void Matrix::setValue(int i, float value)
+{
+    this->values[i] = value;
+}
+
 float Matrix::getValue(int i, int j)
 {
     // аналогично с Matrix::setValue

@@ -8,7 +8,6 @@ Dialog::Dialog(QWidget *parent) :
     ui->setupUi(this);
     // валидация вводимых значений
     ui->matrixSize->setValidator( new QIntValidator);
-    // Из-за особенностей ДаблВалидатора поставил сетлокал на Англию, там используется ".", а не ","
     ui->userValue->setValidator(new QDoubleValidator);
 }
 
@@ -24,6 +23,7 @@ QString Dialog::getMatrixName()
 
 float Dialog::getDefinedValue()
 {
+    // Здесь и далее запятая заменяется на точку, чтобы функция toFloat() работала кореектно
     return ui->userValue->text().replace(",",".").toFloat();
 }
 
