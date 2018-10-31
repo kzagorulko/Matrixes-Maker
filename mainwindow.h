@@ -42,6 +42,8 @@ private slots:
 
     void on_openFile_triggered();
 
+    void on_summation_triggered();
+
 private:
     Ui::MainWindow* ui;
     QProgressBar* progressBar; // Прогресс бар в строке состояния

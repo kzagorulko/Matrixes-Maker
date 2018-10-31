@@ -345,3 +345,8 @@ void MainWindow::on_openFile_triggered()
     file.close();
     qDebug("File is closed.");
 }
+
+void MainWindow::on_summation_triggered()
+{
+
+}

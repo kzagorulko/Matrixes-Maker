@@ -16,14 +16,17 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     dialog.cpp \
-    matrix.cpp
+    matrix.cpp \
+    summation.cpp
 
 HEADERS  += mainwindow.h \
     dialog.h \
-    matrix.h
+    matrix.h \
+    summation.h
 
 FORMS    += mainwindow.ui \
-    dialog.ui
+    dialog.ui \
+    summation.ui
 
 DISTFILES += \
     notes+todo.txt

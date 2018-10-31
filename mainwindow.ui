@@ -34,7 +34,14 @@
     <addaction name="saveFile"/>
     <addaction name="openFile"/>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Действия</string>
+    </property>
+    <addaction name="summation"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="layoutDirection">
@@ -63,6 +70,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="summation">
+   <property name="text">
+    <string>Сложение</string>
    </property>
   </action>
  </widget>
