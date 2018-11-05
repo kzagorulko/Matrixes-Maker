@@ -4,8 +4,9 @@
 #include <cmath>
 #include <QMessageBox>
 
-#define MINUS_W 100 // Временные константы, т.к. до конца не построен графический интерфейс.
-#define MINUS_H 100 // Подразумевают собой расстояние от правого и нижнего края
+#define VERSION 0.9 // Версия программы
+#define MINUS_W 0 // Временные константы, т.к. до конца не построен графический интерфейс.
+#define MINUS_H 0 // Подразумевают собой расстояние от правого и нижнего края
 #define HEIGHT_OF_TAB 30 // Высота служебной панели в TabWidget
 
 
@@ -15,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     // Создание ui формы
     ui->setupUi(this);
-
+    setWindowTitle("Matrixes Maker v"+QString::number(VERSION));
     currentNumberOfTabs = 0; // Количество вкладок обнуляется
 
     // Создание progress bar для наглядного отображения загрузки
@@ -23,6 +24,9 @@ MainWindow::MainWindow(QWidget *parent) :
     progressBar->setLayoutDirection(Qt::LeftToRight);
     statusBar()->addWidget(progressBar);
     progressBar->setValue(100);
+
+    // ВРЕМЕННОЕ: решено временно не показывать програсс бар
+    progressBar->setVisible(false);
 
     // Создания таймера для проверки регулярных условий
     actionTimer = new QTimer(this);
@@ -34,9 +38,13 @@ MainWindow::MainWindow(QWidget *parent) :
     mainTabWidget = new QTabWidget(this);
     mainTabWidget->setVisible(false);
 
+    // Когда окно только открывается нужно сделать некоторые пункты меня неактивными
+    this->setMenusEnabled(false);
+
     // Установление настроек
     displayControlSetting = true; /* когда контроль включён - устанавливается минимальная высота *
                                    * и ширина для lineEdit'ов.                                   */
+
 }
 
 MainWindow::~MainWindow()
@@ -65,6 +73,9 @@ void MainWindow::on_menuCreate_triggered()  // triggered = нажание
                 mainTabWidget->setGeometry(0, 0, width() - MINUS_W , height() -
                                            statusBar()->height() - MINUS_H );
                 matrixes = new Matrix[currentNumberOfTabs+1];
+
+                // Когда создаётся первая матрица, нужно сделать активными неактивные пункты меню
+                this->setMenusEnabled(true);
             } else {
                 // Изменяем размер массива матриц
                 Matrix * temp = new Matrix[currentNumberOfTabs];
@@ -177,6 +188,12 @@ QString MainWindow::get_matrix_values(QWidget * widget)
     return result;
 }
 
+void MainWindow::setMenusEnabled(bool value)
+{
+    ui->saveFile->setEnabled(value);
+    ui->menuAction->setEnabled(value);
+}
+
 void MainWindow::step()
 {
     // Полный прогресс бар можно не демонстрировать
@@ -206,15 +223,6 @@ void MainWindow::on_lineEdit_changed()
             currentMatrix->setValue(i-1, edits[i].replace(",", ".").toFloat());
         }
     }
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-    // убрать кнопку
-    currentTab = mainTabWidget->currentWidget();
-    qDebug("In edits, these values:  %s\nIn matrix, these values: %s\n",
-           get_lineEdits_values(currentTab).toLocal8Bit().data(),
-           get_matrix_values(currentTab).toLocal8Bit().data());
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -273,7 +281,7 @@ void MainWindow::on_openFile_triggered()
     if(file.open(QIODevice::ReadOnly)) {
         // Чтение информации из файла
         QString matrix = file.readLine();
-        QStringList splitMatrix= matrix.split(' ');
+        QStringList splitMatrix = matrix.split(' ');
         qDebug("Opened matrix: %s", matrix.toLocal8Bit().data());
         int sizeOfMatrix = splitMatrix[0].toInt();
         /* Проверка на то, что высота TextEdit будет больше 27 пксл., а длинна больше 50 - иначе *
@@ -293,6 +301,9 @@ void MainWindow::on_openFile_triggered()
                 mainTabWidget->setGeometry(0, 0, width() - MINUS_W , height() -
                                            statusBar()->height() - MINUS_H );
                 matrixes = new Matrix[currentNumberOfTabs+1];
+
+                // Когда создаётся первая матрица, нужно сделать активными неактивные пункты меню
+                this->setMenusEnabled(true);
             } else {
                 // Изменяем размер массива матриц
                 Matrix * temp = new Matrix[currentNumberOfTabs];
@@ -311,11 +322,13 @@ void MainWindow::on_openFile_triggered()
             // непосредственое создание самой матрицы на экране
             QWidget * newTab = new QWidget();
             QGridLayout * layout = new QGridLayout;
+            layout->setVerticalSpacing(0);
+            layout->setHorizontalSpacing(0);
             matrixes[currentNumberOfTabs].setWidget(newTab);
 
             // Заполнение layout'a полями
-            for(int i = 0, k = 1; i < matrixes[currentNumberOfTabs].getSize(); i++) {
-                for(int j = 0; j < matrixes[currentNumberOfTabs].getSize(); j++) {
+            for(int i = 0, k = 1; i < sizeOfMatrix; i++) {
+                for(int j = 0; j < sizeOfMatrix; j++) {
                     if(i < j) {
                         QLabel * label = new QLabel;
                         label->setText("0");
@@ -332,7 +345,7 @@ void MainWindow::on_openFile_triggered()
                 }
             }
             newTab->setLayout(layout);
-            mainTabWidget->addTab(currentTab = newTab, matrixes[currentNumberOfTabs].getName());
+            mainTabWidget->addTab(currentTab = newTab, nameOfMatrix);
             currentNumberOfTabs++;
             progressBar->setValue(100);
         } else {
@@ -348,5 +361,98 @@ void MainWindow::on_openFile_triggered()
 
 void MainWindow::on_summation_triggered()
 {
+    Summation sum(matrixes, currentNumberOfTabs);
+    if(sum.exec() && sum.canBeFolded()) {
+        QString newMatrixName = sum.getName();
+        int first = sum.getIndex();
+        int second = sum.getIndex(true);
+        int sizeOfMatrix = matrixes[first].getSize();
+        qDebug("Preparing for the addition is completed: Name = %s, first = %i, second = %i\nsize "
+               "of matrix = %i", newMatrixName.toLocal8Bit().data(), first, second, sizeOfMatrix);
+        /* Проверка на то, что высота TextEdit будет больше 27 пксл., а длинна больше 50 - иначе *
+         * ухудшается читаемость. Контроль отображения, когда влючен не должен влиять на         *
+         * поведение алгоритма.                                                                  */
+        if(((sizeOfMatrix*27 + 3 < height() - statusBar()->height() - MINUS_H - HEIGHT_OF_TAB)
+            && ( sizeOfMatrix*50 + 3 < width() - MINUS_W) ) || !displayControlSetting) {
 
+            // изменяем размер массива матриц
+            Matrix * temp = new Matrix[currentNumberOfTabs];
+            for(int i = 0; i < currentNumberOfTabs; i++)
+                temp[i] = matrixes[i];
+
+            matrixes = new Matrix[currentNumberOfTabs+1];
+            for(int i = 0; i < currentNumberOfTabs; i++)
+                matrixes[i] = temp[i];
+
+            matrixes[currentNumberOfTabs].setSize(sizeOfMatrix);
+            matrixes[currentNumberOfTabs].setName(newMatrixName);
+
+            // непосредственое создание самой матрицы на экране
+            QWidget * newTab = new QWidget();
+            QGridLayout * layout = new QGridLayout;
+            layout->setVerticalSpacing(0);
+            layout->setHorizontalSpacing(0);
+            matrixes[currentNumberOfTabs].setWidget(newTab);
+
+            // Заполнение layout'a полями
+            for(int i = 0; i < sizeOfMatrix; i++) {
+                for(int j = 0; j < sizeOfMatrix; j++) {
+                    if(i < j) {
+                        QLabel * label = new QLabel;
+                        label->setText("0");
+                        layout->addWidget(label, i, j);
+                    }else {
+                        QLineEdit * line = new QLineEdit;
+                        line->setValidator(new QDoubleValidator);
+                        connect(line, SIGNAL(editingFinished()), this, SLOT(on_lineEdit_changed()));
+                        layout->addWidget(line, i, j);
+                        float value = matrixes[first].getValue(i, j) +
+                                matrixes[second].getValue(i,j);
+                        line->setText(QString::number(value).replace(".",","));
+                        matrixes[currentNumberOfTabs].setValue(i, j, value);
+                    }
+                }
+            }
+            newTab->setLayout(layout);
+            mainTabWidget->addTab(currentTab = newTab, newMatrixName);
+            currentNumberOfTabs++;
+        } else {
+            QMessageBox msg;
+            msg.setText("Ошибка! Корректное отображение матрицы невозможно. Увеличте размер окна "
+                        "или воспользуйтесь другими функциями программы.");
+            msg.exec();
+        }
+        qDebug("Addition complete. New Matrix: %s",
+               matrixes[currentNumberOfTabs-1].getStringMatrix().toLocal8Bit().data());
+    }
+
+}
+
+
+void MainWindow::on_assignment_triggered()
+{
+    /* Функция, отвечающая за вызов диалога с выбором матриц, которые нужно присваивать */
+    Assignment assignment(matrixes, currentNumberOfTabs);
+    if(assignment.exec() && assignment.isSizeOk()) {
+        int index1 = assignment.getIndexOfMatrix(); // индекс матрицы, которой будут присвоены новые
+                                                    // значения
+        int index2 = assignment.getIndexOfMatrix(true); // индекс матрицы, из которой будут взяты
+                                                        // новые значения
+        // Меняется текущая вкладка, чтобы был сразу виден результат
+        mainTabWidget->setCurrentIndex(index1);
+        currentTab = mainTabWidget->currentWidget();
+        QLayout * layout = currentTab->layout();
+        for(int i = 0; i < layout->count(); i++) {
+            /* Для того, чтобы не "залезть" в лейблы, расчитывается условие неперехода в верхний *
+             * треугольник                                                                       */
+            int j = i%(int)sqrt(layout->count()), i_i = i/(int)sqrt(layout->count());
+            if(i_i >= j) {
+                QLineEdit *line = qobject_cast<QLineEdit*>(layout->itemAt(i)->widget());
+                // смена значений в матрице, как в объекте
+                matrixes[index1].setValue(i_i, j, matrixes[index2].getValue(i_i, j));
+                // заменазначений на экране
+                line->setText(QString::number(matrixes[index1].getValue(i_i, j)).replace(".",","));
+            }
+        }
+    }
 }

@@ -17,16 +17,19 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     dialog.cpp \
     matrix.cpp \
-    summation.cpp
+    summation.cpp \
+    assignment.cpp
 
 HEADERS  += mainwindow.h \
     dialog.h \
     matrix.h \
-    summation.h
+    summation.h \
+    assignment.h
 
 FORMS    += mainwindow.ui \
     dialog.ui \
-    summation.ui
+    summation.ui \
+    assignment.ui
 
 DISTFILES += \
     notes+todo.txt

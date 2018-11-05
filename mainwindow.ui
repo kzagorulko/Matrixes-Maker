@@ -34,14 +34,15 @@
     <addaction name="saveFile"/>
     <addaction name="openFile"/>
    </widget>
-   <widget class="QMenu" name="menu">
+   <widget class="QMenu" name="menuAction">
     <property name="title">
      <string>Действия</string>
     </property>
     <addaction name="summation"/>
+    <addaction name="assignment"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menu"/>
+   <addaction name="menuAction"/>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="layoutDirection">
@@ -75,6 +76,17 @@
   <action name="summation">
    <property name="text">
     <string>Сложение</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
+   </property>
+  </action>
+  <action name="assignment">
+   <property name="text">
+    <string>Присваивание</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
    </property>
   </action>
  </widget>

@@ -14,6 +14,8 @@
 // локальные файлы
 #include "dialog.h"
 #include "matrix.h"
+#include "summation.h"
+#include "assignment.h"
 
 namespace Ui {
 class MainWindow;
@@ -35,14 +37,12 @@ private slots:
     void on_menuCreate_triggered();
     void step(); // Метод для регулярной обработки условий
     void on_lineEdit_changed();
-    void on_pushButton_clicked();
     void resizeEvent(QResizeEvent * event);
-
     void on_saveFile_triggered();
-
     void on_openFile_triggered();
-
     void on_summation_triggered();
+
+    void on_assignment_triggered();
 
 private:
     Ui::MainWindow* ui;
@@ -58,6 +58,9 @@ private:
 
     QString get_lineEdits_values(QWidget *widget);
     QString get_matrix_values(QWidget *widget);
+
+    void setMenusEnabled(bool value);
+
     int currentNumberOfTabs;
 
 };

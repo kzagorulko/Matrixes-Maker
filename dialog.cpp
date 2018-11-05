@@ -6,6 +6,7 @@ Dialog::Dialog(QWidget *parent) :
     ui(new Ui::Dialog)
 {
     ui->setupUi(this);
+    setWindowTitle("Создание");
     // валидация вводимых значений
     ui->matrixSize->setValidator( new QIntValidator);
     ui->userValue->setValidator(new QDoubleValidator);
