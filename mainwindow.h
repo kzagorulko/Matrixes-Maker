@@ -55,6 +55,11 @@ private:
 
     // Переменные настроек
     bool displayControlSetting;
+    bool incorrectTabWidgetDisplay; // Если таб виджет накладывается на меню бар (было обнаружено в
+                                    // kubuntu), то следует изменить координату "у" таб виджета
+
+    int tabWidgetY; // переменная, которая нулевая, когда c отображением всё впорядке, иначе выстой
+                    // в меню бар
 
     QString get_lineEdits_values(QWidget *widget);
     QString get_matrix_values(QWidget *widget);

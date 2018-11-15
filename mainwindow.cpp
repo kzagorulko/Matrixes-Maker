@@ -8,6 +8,7 @@
 #define MINUS_W 0 // Временные константы, т.к. до конца не построен графический интерфейс.
 #define MINUS_H 0 // Подразумевают собой расстояние от правого и нижнего края
 #define HEIGHT_OF_TAB 30 // Высота служебной панели в TabWidget
+#define KUBUNTU_PANEL 30
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -44,7 +45,11 @@ MainWindow::MainWindow(QWidget *parent) :
     // Установление настроек
     displayControlSetting = true; /* когда контроль включён - устанавливается минимальная высота *
                                    * и ширина для lineEdit'ов.                                   */
+    incorrectTabWidgetDisplay = true; /* когда отображение некорректно, следует создавать таб *
+                                       * виджет в других координатах                          */
 
+
+    tabWidgetY = incorrectTabWidgetDisplay ? ui->menuBar->height() : 0;
 }
 
 MainWindow::~MainWindow()
@@ -70,7 +75,7 @@ void MainWindow::on_menuCreate_triggered()  // triggered = нажание
             if(currentNumberOfTabs == 0)  {
                 // Создаётся таб виджет при первом создании вкладки
                 mainTabWidget->setVisible(true);
-                mainTabWidget->setGeometry(0, 0, width() - MINUS_W , height() -
+                mainTabWidget->setGeometry(0, tabWidgetY, width() - MINUS_W , height() -
                                            statusBar()->height() - MINUS_H );
                 matrixes = new Matrix[currentNumberOfTabs+1];
 
@@ -229,7 +234,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
     if(mainTabWidget->isVisible()) {
-        mainTabWidget->setGeometry(0, 0, width() - MINUS_W , height() -
+        mainTabWidget->setGeometry(0, tabWidgetY, width() - MINUS_W , height() -
                                    statusBar()->height() - MINUS_H );
     }
 }
@@ -298,7 +303,7 @@ void MainWindow::on_openFile_triggered()
             {
                 // Создаётся таб виджет при первом создании вкладки
                 mainTabWidget->setVisible(true);
-                mainTabWidget->setGeometry(0, 0, width() - MINUS_W , height() -
+                mainTabWidget->setGeometry(0, tabWidgetY, width() - MINUS_W , height() -
                                            statusBar()->height() - MINUS_H );
                 matrixes = new Matrix[currentNumberOfTabs+1];
 
